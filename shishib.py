@@ -13,8 +13,8 @@ import requests
 # ==================== 1. 系统核心配置 ====================
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-TOKEN = os.environ.get('TELEGRAM_TOKEN', '8965619504:AAG3OZU9zVeXjdeVOcey7l8KhDHF5Urp6Wo')
-WEBHOOK_URL = os.environ.get('WEBHOOK_URL', 'https://shishi-778gg.onrender.com')
+TOKEN = os.environ.get('TELEGRAM_TOKEN', '8965619504:AAHixOOdY-tQdTI7LP9wQDNX3avi_VNuPGk')
+WEBHOOK_URL = os.environ.get('WEBHOOK_URL', 'https://shishi-799gg.onrender.com')
 PORT = int(os.environ.get('PORT', 5000))
 
 # 顶级系统创始人UID（拥有最高买家资格，且负责审核续费凭证）
@@ -332,7 +332,7 @@ def cmd_start(message):
         bot.send_message(gid, welcome, parse_mode="HTML", reply_markup=markup)
     else:
         welcome = (
-            "🤖 <b>小机器人智能分布式记账系统已激活</b>\n\n"
+            "🤖 <b>小跟班智能分布式记账系统已激活</b>\n\n"
             "👉 <b>群内核心记账命令：</b>\n"
             "• 发送 <code>上课</code> / <code>下课</code> 开启或封存账单\n"
             "• 发送 <code>+1000</code> 或 <code>+1000/7.3</code> 记入款\n"
@@ -363,7 +363,7 @@ def handle_private_buttons(call):
     # 2. 详细说明书
     elif call.data == "btn_manual_guide":
         manual = (
-            "📖 <b>【小机器人】全功能业务操作指南</b>\n\n"
+            "📖 <b>【小跟班记账】全功能业务操作指南</b>\n\n"
             "👑 <b>权限架构：</b>\n"
             "1. <b>最高级买家</b>：控制全局，在私聊有 6 键菜单，可指派二级权限人。\n"
             "2. <b>权限人(二级VIP)</b>：协助买家管事，在私聊无法配置老板，但可以被拉进各个群指派群操作人。\n"

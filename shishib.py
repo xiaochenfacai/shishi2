@@ -1,4 +1,4 @@
-"""
+Please send me a valid URL. https is required."""
 小财家记账 Telegram Bot + Flask Web 看板
 部署环境变量: TELEGRAM_TOKEN, WEBHOOK_URL, PORT (可选)
 """
@@ -28,7 +28,7 @@ TOKEN = (
     or os.environ.get("BOT_TOKEN")
     or ""
 ).strip()
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "https://shishi-887gg.onrender.com").rstrip("/")
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "https://caicai-887gg.onrender.com").rstrip("/")
 PORT = int(os.environ.get("PORT", "10000"))
 
 # ========== 品牌与价格（复制新机器人时主要改这里）==========
@@ -362,16 +362,37 @@ def apply_bot_display_name(name):
     return clean
 
 
+def prepare_avatar_image(raw_bytes, size=640):
+    """把任意图片自动裁成正方形并缩放到头像尺寸。"""
+    from PIL import Image
+
+    with Image.open(io.BytesIO(raw_bytes)) as img:
+        img = img.convert("RGBA")
+        w, h = img.size
+        side = min(w, h)
+        left = (w - side) // 2
+        top = (h - side) // 2
+        img = img.crop((left, top, left + side, top + side))
+        img = img.resize((size, size), Image.Resampling.LANCZOS)
+
+        canvas = Image.new("RGB", (size, size), (255, 255, 255))
+        canvas.paste(img, mask=img.split()[3])
+        out = io.BytesIO()
+        canvas.save(out, format="JPEG", quality=92, optimize=True)
+        out.seek(0)
+        return out
+
+
 def apply_bot_profile_photo(file_id):
     file_info = bot.get_file(file_id)
     data = bot.download_file(file_info.file_path)
-    stream = io.BytesIO(data) if isinstance(data, bytes) else data
-    stream.seek(0)
-    try:
-        ok = bot.set_my_profile_photo(photo=stream)
-    except TypeError:
-        stream.seek(0)
-        ok = bot.set_my_profile_photo(photo=telebot.types.InputFile(stream, file_name="avatar.jpg"))
+    raw = data if isinstance(data, bytes) else data.read()
+    stream = prepare_avatar_image(raw)
+    stream.name = "avatar.jpg"
+    profile_photo = telebot.types.InputProfilePhotoStatic(
+        telebot.types.InputFile(stream, file_name="avatar.jpg")
+    )
+    ok = bot.set_my_profile_photo(photo=profile_photo)
     if ok is False:
         raise RuntimeError("Telegram 拒绝修改头像")
     return True
@@ -724,8 +745,8 @@ def handle_private_buttons(call):
         USER_STATE[uid] = "WAITING_BOT_PHOTO"
         bot.send_message(
             chat_id,
-            "🖼 请直接发送一张<b>正方形图片</b>作为机器人头像：\n"
-            "（建议清晰 logo，不要发截图文字）",
+            "🖼 请直接发一张图片给我（截图、logo、照片都可以）。\n\n"
+            "我会<b>自动裁成正方形</b>并优化成头像尺寸，再帮你换上。",
             parse_mode="HTML",
         )
 
@@ -814,7 +835,11 @@ def handle_receipt_photo(message):
         photo_id = message.photo[-1].file_id
         try:
             apply_bot_profile_photo(photo_id)
-            bot.reply_to(message, "✅ 机器人头像已更新！请在 Telegram 聊天列表查看。")
+            bot.reply_to(
+                message,
+                "✅ 头像已更新！\n"
+                "（已自动裁剪为正方形并优化尺寸，请在聊天列表查看机器人资料）",
+            )
         except Exception as exc:
             log.exception("set bot photo failed: %s", exc)
             bot.reply_to(message, f"❌ 头像更新失败：{exc}")

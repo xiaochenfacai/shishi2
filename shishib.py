@@ -1,4 +1,4 @@
-Please send me a valid URL. https is required."""
+"""
 小财家记账 Telegram Bot + Flask Web 看板
 部署环境变量: TELEGRAM_TOKEN, WEBHOOK_URL, PORT (可选)
 """
